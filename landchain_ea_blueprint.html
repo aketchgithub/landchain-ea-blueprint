@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LandChain EA — First Principles Blueprint</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Mono:wght@300;400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  
+:root {
+  --bg:       #0E0C09;
+  --bg2:      #15120D;
+  --bg3:      #1C1710;
+  --surface:  #221C13;
+  --border:   rgba(180,130,60,0.18);
+  --border2:  rgba(180,130,60,0.08);
+  --amber:    #C8882A;
+  --amber2:   #E8A84A;
+  --amber3:   #F5C878;
+  --sand:     #D4B896;
+  --sand2:    #EAD9C4;
+  --ink:      #F0E8DC;
+  --ink2:     #C4B49A;
+  --ink3:     #887A68;
+  --red:      #C04040;
+  --red2:     #E05050;
+  --orange:   #D07030;
+  --green:    #4A8C5C;
+  --green2:   #5EAA72;
+  --blue:     #3A6898;
+  --blue2:    #4E82B8;
+  --r: 8px;
+}
+
+/* ─── RESET ──────────────────────────────────────────── */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Outfit',sans-serif;
+  font-size:14px;
+  line-height:1.65;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ─── TOPOGRAPHIC BACKGROUND ─────────────────────────── */
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 20% 20%, rgba(200,136,42,0.04) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 80%, rgba(74,140,92,0.03) 0%, transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+
+/* ─── COVER ──────────────────────────────────────────── */
+.cover{
+  position:relative;
+  padding:72px 60px 60px;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.cover-grid{
+  display:grid;
+  grid-template-columns:1fr 320px;
+  gap:40px;
+  align-items:end;
+  max-width:1100px;
+  margin:0 auto;
+}
+.cover-eyebrow{
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.cover-eyebrow::before{
+  content:'';
+  display:inline-block;
+  width:24px;height:1px;
+  background:var(--amber);
+}
+.cover h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(52px,7vw,88px);
+  font-weight:700;
+  line-height:0.95;
+  letter-spacing:-1px;
+  color:var(--sand2);
+}
+.cover h1 em{
+  font-style:italic;
+  color:var(--amber2);
+}
+.cover-tagline{
+  margin-top:24px;
+  font-size:14px;
+  color:var(--ink2);
+  max-width:520px;
+  line-height:1.7;
+  font-weight:300;
+}
+.cover-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.cover-stat{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:16px 18px;
+}
+.cover-stat .num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:32px;
+  font-weight:600;
+  color:var(--amber2);
+  line-height:1;
+}
+.cover-stat .lbl{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--ink3);
+  margin-top:4px;
+}
+
+/* ─── TOPO LINES (decorative) ────────────────────────── */
+.topo{
+  position:absolute;
+  right:-40px;top:0;bottom:0;
+  width:280px;
+  opacity:0.04;
+  pointer-events:none;
+  overflow:hidden;
+}
+.topo svg{width:100%;height:100%}
+
+/* ─── NAV ────────────────────────────────────────────── */
+.nav{
+  position:sticky;top:0;z-index:50;
+  background:rgba(14,12,9,0.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 60px;
+  display:flex;
+  gap:2px;
+  overflow-x:auto;
+}
+.nav-btn{
+  font-family:'DM Mono',monospace;
+  font-size:10px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  background:transparent;
+  border:none;
+  border-bottom:2px solid transparent;
+  padding:14px 16px 12px;
+  color:var(--ink3);
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all 0.2s;
+  position:relative;
+}
+.nav-btn:hover{color:var(--amber2);}
+.nav-btn.on{color:var(--amber2);border-bottom-color:var(--amber);}
+
+/* ─── LAYOUT ─────────────────────────────────────────── */
+.main{max-width:1100px;margin:0 auto;padding:0 60px 100px;}
+.pane{display:none;padding-top:56px;animation:fadeUp 0.3s ease both;}
+.pane.on{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ─── SECTION HEADER ─────────────────────────────────── */
+.sh{margin-bottom:40px;}
+.sh-tag{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin-bottom:10px;
+}
+.sh h2{
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px;
+  font-weight:600;
+  color:var(--sand2);
+  line-height:1.05;
+}
+.sh p{
+  margin-top:10px;
+  font-size:14px;
+  color:var(--ink2);
+  max-width:640px;
+  font-weight:300;
+}
+
+/* ─── CARD GRID ──────────────────────────────────────── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:22px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color 0.2s;
+}
+.card:hover{border-color:var(--amber);}
+.card-accent{
+  position:absolute;
+  top:0;left:0;width:3px;height:100%;
+  background:var(--amber);
+  border-radius:var(--r) 0 0 var(--r);
+}
+.card-accent.red{background:var(--red);}
+.card-accent.green{background:var(--green);}
+.card-accent.blue{background:var(--blue);}
+.card-accent.orange{background:var(--orange);}
+.card-icon{font-size:20px;margin-bottom:10px;}
+.card h3{
+  font-size:14px;font-weight:600;
+  color:var(--sand2);margin-bottom:6px;
+}
+.card p{font-size:13px;color:var(--ink2);line-height:1.6;}
+.card-tag{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:3px 8px;
+  border-radius:3px;
+  display:inline-block;
+  margin-bottom:10px;
+}
+.tag-miss{background:rgba(192,64,64,0.15);color:#E07070;border:1px solid rgba(192,64,64,0.3);}
+.tag-keep{background:rgba(74,140,92,0.15);color:#7ACA90;border:1px solid rgba(74,140,92,0.3);}
+.tag-add{background:rgba(200,136,42,0.15);color:var(--amber3);border:1px solid rgba(200,136,42,0.3);}
+
+/* ─── INSIGHT BLOCK ──────────────────────────────────── */
+.insight{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:36px 40px;
+  margin:32px 0;
+  position:relative;
+  overflow:hidden;
+}
+.insight::before{
+  content:'"';
+  font-family:'Cormorant Garamond',serif;
+  font-size:160px;
+  position:absolute;
+  top:-20px;right:24px;
+  color:rgba(200,136,42,0.07);
+  line-height:1;
+  pointer-events:none;
+}
+.insight blockquote{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;
+  font-style:italic;
+  font-weight:300;
+  color:var(--sand2);
+  line-height:1.55;
+  max-width:700px;
+  position:relative;
+}
+.insight-source{
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--amber);
+  margin-top:16px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.insight-source::before{content:'';display:inline-block;width:16px;height:1px;background:var(--amber);}
+
+/* ─── KPI ROW ────────────────────────────────────────── */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:12px;
+  margin:28px 0;
+}
+.kpi{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px 16px;
+  text-align:center;
+}
+.kpi .num{
+  font-family:'Cormorant Garamond',serif;
+  font-size:30px;
+  font-weight:700;
+  color:var(--amber2);
+  line-height:1;
+}
+.kpi .desc{
+  font-size:11px;
+  color:var(--ink3);
+  margin-top:6px;
+  line-height:1.4;
+}
+
+/* ─── DIVIDER ────────────────────────────────────────── */
+.div{border:none;border-top:1px solid var(--border);margin:36px 0;}
+
+/* ─── ASSUMPTION ACCORDIONS ──────────────────────────── */
+.acc{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  margin-bottom:10px;
+  overflow:hidden;
+  transition:border-color 0.2s;
+}
+.acc:hover{border-color:rgba(200,136,42,0.35);}
+.acc-head{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:18px 20px;
+  cursor:pointer;
+  user-select:none;
+}
+.acc-badge{
+  flex-shrink:0;
+  font-family:'DM Mono',monospace;
+  font-size:9px;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+  padding:3px 9px;
+  border-radius:3px;
+  margin-top:2px;
+}
+.badge-shaky{background:rgba(192,64,64,0.15);color:#E07070;border:1px solid rgba(192,64,64,0.3);}
+.badge-partial{background:rgba(200,140,40,0.15);color:var(--amber3);border:1px solid rgba(200,140,40,0.3);}
+.badge-valid{background:rgba(74,140,92,0.15);color:#7ACA90;border:1px solid rgba(74,140,92,0.3);}
+.acc-title{font-size:14px;font-weight:500;color:var(--sand2);flex:1;line-height:1.4;}
+.acc-toggle{
+  font-size:18px;color:var(--amber);flex-shrink:0;
+  transition:transform 0.25s;line-height:1;margin-top:-1px;
+}
+.acc.open .acc-toggle{transform:rotate(45deg);}
+.acc-body{
+  display:none;
+  padding:0 20px 20px;
+  border-top:1px solid var(--border2);
+}
+.acc.open .acc-body{display:block;}
+.acc-verdict{margin-top:14px;font-size:13px;color:var(--ink2);line-height:1.65;}
+.acc-challenge{
+  background:rgba(192,64,64,0.08);
+  border-left:3px solid var(--red2);
+  padding:10px 14px;margin-top:12px;
+  font-size:12px;color:var(--ink2);line-height:1.6;
+  border-radius:0 4px 4px 0;
+}
+.acc-reframe{
+  background:rgba(74,140,92,0.08);
+  border-left:3px solid var(--green2);
+  padding:10px 14px;margin-top:8px;
+  font-size:12px;color:var(--ink2);line-height:1.6;
+  border-radius:0 4px 4px 0;
+}
+
+/* ─── ARCH LAYERS ────────────────────────────────────── */
+.arch-wrap{max-width:760px;}
+.arch-layer{
+  display:flex;gap:18px;align-items:flex-start;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:18px 22px;
+  margin-bottom:8px;
+  transition:border-color 0.2s;
+}
+.arch-layer:hover{border-color:var(--amber);}
+.arch-pill{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:#fff;padding:5px 12px;border-radius:4px;
+  flex-shrink:0;min-width:90px;text-align:center;margin-top:2px;
+}
+.arch-layer h4{font-size:13px;font-weight:600;color:var(--sand2);margin-bottom:4px;}
+.arch-layer p{font-size:12px;color:var(--ink2);line-height:1.55;}
+.arch-arrow{text-align:center;color:var(--amber);font-size:16px;margin:2px 0;opacity:0.5;}
+.arch-new{font-size:10px;color:var(--red2);font-weight:400;font-family:'DM Mono',monospace;}
+
+/* ─── RISK TABLE ─────────────────────────────────────── */
+.risk-wrap{overflow-x:auto;}
+.risk-table{width:100%;border-collapse:collapse;}
+.risk-table th{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--amber);padding:12px 16px;text-align:left;
+  border-bottom:1px solid var(--border);
+  background:var(--bg2);white-space:nowrap;
+}
+.risk-table td{
+  padding:13px 16px;border-bottom:1px solid var(--border2);
+  font-size:12px;color:var(--ink2);vertical-align:top;line-height:1.55;
+}
+.risk-table tr:hover td{background:rgba(200,136,42,0.03);}
+.sev{font-weight:600;white-space:nowrap;}
+.sev-c{color:#E07070;}
+.sev-h{color:var(--amber3);}
+.sev-m{color:#7ACA90;}
+.sev-dot{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:6px;}
+.dc{background:#E07070;}
+.dh{background:var(--amber3);}
+.dm{background:#7ACA90;}
+
+/* ─── TIMELINE ───────────────────────────────────────── */
+.timeline{position:relative;padding-left:40px;}
+.timeline::before{
+  content:'';position:absolute;
+  left:14px;top:12px;bottom:12px;width:1px;
+  background:linear-gradient(to bottom,var(--amber),rgba(200,136,42,0.1));
+}
+.phase{position:relative;margin-bottom:36px;}
+.phase-dot{
+  position:absolute;left:-30px;top:5px;
+  width:12px;height:12px;border-radius:50%;
+  background:var(--amber);
+  border:2px solid var(--bg);
+  box-shadow:0 0 0 2px var(--amber);
+}
+.phase-header{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+.phase-tag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--amber);text-transform:uppercase;}
+.phase-title{font-size:17px;font-weight:600;color:var(--sand2);}
+.phase-dur{
+  font-family:'DM Mono',monospace;font-size:9px;
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--ink3);padding:2px 10px;border-radius:3px;
+}
+.phase-body{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 22px;}
+.phase-body ul{list-style:none;}
+.phase-body li{
+  font-size:12px;color:var(--ink2);
+  padding:4px 0 4px 18px;position:relative;line-height:1.5;
+}
+.phase-body li::before{
+  content:'→';position:absolute;left:0;
+  color:var(--amber);font-size:10px;top:5px;
+}
+
+/* ─── REBATTLE ───────────────────────────────────────── */
+.rebattle{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  margin-bottom:14px;
+  overflow:hidden;
+}
+.reb-head{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-bottom:1px solid var(--border);
+}
+.reb-hcell{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--amber);padding:10px 16px;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+}
+.reb-hcell:last-child{border-right:none;}
+.reb-row{display:grid;grid-template-columns:1fr 1fr 1fr;}
+.reb-cell{
+  padding:14px 16px;font-size:12px;color:var(--ink2);
+  border-right:1px solid var(--border2);line-height:1.6;
+  vertical-align:top;
+}
+.reb-cell:last-child{border-right:none;}
+.reb-cell strong{color:var(--sand2);font-size:13px;display:block;margin-bottom:4px;}
+
+/* ─── MOAT GRID ──────────────────────────────────────── */
+.moat-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:28px;}
+.moat-card{
+  background:linear-gradient(135deg,var(--bg3) 0%,var(--surface) 100%);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:24px;
+  position:relative;
+  overflow:hidden;
+}
+.moat-card::after{
+  content:'';position:absolute;
+  bottom:0;right:0;
+  width:60px;height:60px;
+  border-top:1px solid var(--border);
+  border-left:1px solid var(--border);
+  border-radius:var(--r) 0 0 0;
+  background:var(--bg);
+  clip-path:polygon(100% 0,100% 100%,0 100%);
+}
+.moat-tag{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--amber);margin-bottom:10px;
+}
+.moat-card h4{font-size:16px;font-weight:600;color:var(--sand2);margin-bottom:8px;}
+.moat-card p{font-size:12px;color:var(--ink2);line-height:1.6;}
+
+/* ─── REV MODEL ──────────────────────────────────────── */
+.rev-row{
+  display:flex;gap:14px;margin-bottom:10px;
+  align-items:flex-start;
+}
+.rev-tier{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  background:var(--amber);color:#000;
+  padding:4px 10px;border-radius:3px;flex-shrink:0;
+  font-weight:500;min-width:68px;text-align:center;margin-top:2px;
+}
+.rev-row h4{font-size:13px;font-weight:600;color:var(--sand2);margin-bottom:3px;}
+.rev-row p{font-size:12px;color:var(--ink2);line-height:1.5;}
+
+/* ─── NORTH STAR ─────────────────────────────────────── */
+.north-star{
+  background:linear-gradient(135deg,#1A1208 0%,var(--surface) 100%);
+  border:1px solid var(--amber);
+  border-radius:12px;
+  padding:40px;
+  margin-top:32px;
+  position:relative;
+  overflow:hidden;
+}
+.north-star::before{
+  content:'★';
+  position:absolute;right:32px;top:20px;
+  font-size:100px;color:rgba(200,136,42,0.06);line-height:1;
+}
+.north-star blockquote{
+  font-family:'Cormorant Garamond',serif;
+  font-size:24px;font-style:italic;font-weight:300;
+  color:var(--sand2);line-height:1.5;
+  max-width:680px;position:relative;
+}
+.north-star .ns-label{
+  font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--amber);margin-top:18px;
+  display:flex;align-items:center;gap:8px;
+}
+.north-star .ns-label::before{content:'';display:inline-block;width:20px;height:1px;background:var(--amber);}
+
+/* ─── UTILITY ────────────────────────────────────────── */
+.mt16{margin-top:16px;}
+.mt24{margin-top:24px;}
+.mt32{margin-top:32px;}
+.mb8{margin-bottom:8px;}
+.mb16{margin-bottom:16px;}
+.mb24{margin-bottom:24px;}
+.label2{font-size:18px;font-weight:600;color:var(--sand2);margin-bottom:16px;margin-top:32px;}
+
+/* ─── RESPONSIVE ─────────────────────────────────────── */
+@media(max-width:860px){
+  .cover{padding:48px 24px 40px;}
+  .cover-grid{grid-template-columns:1fr;}
+  .main{padding:0 24px 80px;}
+  .nav{padding:0 16px;}
+  .grid-2,.grid-3,.moat-grid,.reb-head,.reb-row,.cover-stats{grid-template-columns:1fr;}
+  .reb-hcell,.reb-cell{border-right:none;border-bottom:1px solid var(--border2);}
+  .rev-row{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ COVER ═══════════════════════════════════════ -->
+<header class="cover">
+  <div class="topo">
+    <svg viewBox="0 0 280 600" fill="none" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+      <ellipse cx="140" cy="300" rx="130" ry="270" stroke="white" stroke-width="0.5"/>
+      <ellipse cx="140" cy="300" rx="105" ry="220" stroke="white" stroke-width="0.5"/>
+      <ellipse cx="140" cy="300" rx="80" ry="170" stroke="white" stroke-width="0.5"/>
+      <ellipse cx="140" cy="300" rx="58" ry="125" stroke="white" stroke-width="0.5"/>
+      <ellipse cx="140" cy="300" rx="38" ry="85" stroke="white" stroke-width="0.5"/>
+      <ellipse cx="140" cy="300" rx="20" ry="48" stroke="white" stroke-width="0.5"/>
+      <line x1="0" y1="150" x2="280" y2="130" stroke="white" stroke-width="0.3"/>
+      <line x1="0" y1="220" x2="280" y2="200" stroke="white" stroke-width="0.3"/>
+      <line x1="0" y1="290" x2="280" y2="310" stroke="white" stroke-width="0.3"/>
+      <line x1="0" y1="360" x2="280" y2="380" stroke="white" stroke-width="0.3"/>
+      <line x1="0" y1="430" x2="280" y2="440" stroke="white" stroke-width="0.3"/>
+    </svg>
+  </div>
+
+  <div class="cover-grid">
+    <div>
+      <div class="cover-eyebrow">First-Principles Blueprint &nbsp;·&nbsp; East Africa</div>
+      <h1>Land<em>Chain</em><br>EA</h1>
+      <p class="cover-tagline">An unsparing interrogation of a next-generation land registry platform — assumptions autopsied, architecture hardened, risks mapped, rebattles answered. Built for the land, not the ledger.</p>
+    </div>
+    <div class="cover-stats">
+      <div class="cover-stat"><div class="num">~70%</div><div class="lbl">EA land untitled</div></div>
+      <div class="cover-stat"><div class="num">$1T+</div><div class="lbl">dead capital locked</div></div>
+      <div class="cover-stat"><div class="num">15yr</div><div class="lbl">avg. dispute timeline</div></div>
+      <div class="cover-stat"><div class="num">40%+</div><div class="lbl">Kenya fraud is land</div></div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══ NAV ══════════════════════════════════════════ -->
+<nav class="nav">
+  <button class="nav-btn on" data-pane="thesis">01 · The Thesis</button>
+  <button class="nav-btn" data-pane="assumptions">02 · Assumption Autopsy</button>
+  <button class="nav-btn" data-pane="arch">03 · Hardened Architecture</button>
+  <button class="nav-btn" data-pane="risks">04 · Risk Register</button>
+  <button class="nav-btn" data-pane="phases">05 · Execution Phases</button>
+  <button class="nav-btn" data-pane="rebattles">06 · Rebattles</button>
+  <button class="nav-btn" data-pane="moat">07 · Moat &amp; Scale</button>
+</nav>
+
+<div class="main">
+
+<!-- ═══ PANE 1: THESIS ════════════════════════════════ -->
+<div class="pane on" id="thesis">
+  <div class="sh">
+    <div class="sh-tag">01 · Core Thesis</div>
+    <h2>What this is<br><em>really</em> solving</h2>
+    <p>Your architecture is technically sound. The interrogation starts with the problem definition — because you can build the right technology on the wrong premise.</p>
+  </div>
+
+  <div class="insight">
+    <blockquote>Land in East Africa is the most valuable asset most families will ever hold — yet the system designed to protect that asset is the primary instrument of their dispossession. The platform's real job is not digitisation. It is the elimination of information asymmetry as a tool of power.</blockquote>
+    <div class="insight-source">Root cause analysis</div>
+  </div>
+
+  <div class="kpi-row">
+    <div class="kpi"><div class="num">~70%</div><div class="desc">of EA land held without formal title</div></div>
+    <div class="kpi"><div class="num">5–15yr</div><div class="desc">average court timeline for land disputes</div></div>
+    <div class="kpi"><div class="num">$1T+</div><div class="desc">dead capital in untitled African land</div></div>
+    <div class="kpi"><div class="num">3rd</div><div class="desc">cause of gender-based poverty: widowhood land loss</div></div>
+    <div class="kpi"><div class="num">40%+</div><div class="desc">of fraud cases in Kenya involve land</div></div>
+  </div>
+
+  <hr class="div">
+
+  <p class="label2">What your original design gets right</p>
+  <div class="grid-auto mb24">
+    <div class="card">
+      <div class="card-accent green"></div>
+      <div class="card-tag tag-keep">✓ Valid</div>
+      <h3>Blockchain as base layer, not product</h3>
+      <p>Correct framing. The public shouldn't interact with the chain directly. It is the tamper-evident audit trail — not the interface, not the database.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent green"></div>
+      <div class="card-tag tag-keep">✓ Valid</div>
+      <h3>USSD alongside web</h3>
+      <p>This single decision separates a real product from a tech demo. Feature phones dominate rural EA land-owners. M-Pesa proved USSD works for high-stakes finance.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent green"></div>
+      <div class="card-tag tag-keep">✓ Valid</div>
+      <h3>Legal intelligence layer</h3>
+      <p>Injunctions and caveats are precisely where fraud hides. Connecting to court APIs is the right instinct — almost no other platform does this.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent red"></div>
+      <div class="card-tag tag-miss">⚠ Gap</div>
+      <h3>No identity anchor</h3>
+      <p>Who is asserting ownership? Without a biometric or national-ID anchor before any write, the blockchain simply records whoever submits first — including fraudsters.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent red"></div>
+      <div class="card-tag tag-miss">⚠ Gap</div>
+      <h3>No dispute resolution engine</h3>
+      <p>Boundary conflicts and double-titles are the #1 use case in EA. The architecture describes layers but has no workflow for the most common event a user will face.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent orange"></div>
+      <div class="card-tag tag-miss">⚠ Gap</div>
+      <h3>AI modules lack citizen focus</h3>
+      <p>Valuation, zoning, and utility planning serve institutions, not people. The citizen-facing value proposition — why a smallholder registers — is underdeveloped.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANE 2: ASSUMPTIONS ═══════════════════════════ -->
+<div class="pane" id="assumptions">
+  <div class="sh">
+    <div class="sh-tag">02 · Assumption Autopsy</div>
+    <h2>Every premise<br>put on the table</h2>
+    <p>First-principles thinking requires killing your own assumptions before a critic does. Each card examines what you are implicitly believing, why it might be wrong, and what to do instead.</p>
+  </div>
+
+  <div class="acc open">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-shaky">Shaky</span>
+      <span class="acc-title">Blockchain immutability solves the trust problem</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">The chain is only as trustworthy as the data entered into it. If a corrupt official registers a fraudulent title first, the blockchain permanently and immutably enshrines that fraud. "Garbage in, garbage in forever" — and now it's tamper-proof garbage.</div>
+      <div class="acc-challenge">🔴 The trust problem in EA land sits at the point of data entry and attestation — not at the point of storage. Blockchain solves the wrong part of the problem if the intake process is corrupted. See Honduras 2016: blockchain pilot failed precisely because the underlying registry data was bad.</div>
+      <div class="acc-reframe">✅ Reframe: Treat blockchain as a conflict-detection and history tool, not a ground-truth oracle. Combine with multi-party attestation (community witnesses + government officer + satellite boundary verification) before any write is accepted. Add a mandatory 30-day public challenge window per new registration. The chain's job is to make fraud visible over time, not to prevent it at entry.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-shaky">Shaky</span>
+      <span class="acc-title">Governments will integrate via API once the platform is built</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">East African land registries are chronically underfunded, understaffed, and politically sensitive. API integration requires sustained political will, technical capacity on the government side, data-sharing agreements, and legal framework changes — each of which can take years independently.</div>
+      <div class="acc-challenge">🔴 Kenya's Ardhisasa system took 10+ years to build and is still contested in court. Rwanda's success required post-genocide political centralisation that is unique and unreplicable. Building on assumed government cooperation is building on sand.</div>
+      <div class="acc-reframe">✅ Reframe: Design for a "shadow registry" model first — create independent community value, demonstrate it at scale, then negotiate government integration from a position of proven utility and political leverage. Target your pilot in a sub-county where a specific reformist official is already a champion. One cooperative county council beats a national MoU that never closes.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-partial">Partial</span>
+      <span class="acc-title">AI valuations will be accurate enough to be useful</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">AI valuation models perform poorly on smallholder rural plots with high informality, low historical transaction volume, and non-standard ownership structures. Most available training data is urban, titled, and Western.</div>
+      <div class="acc-challenge">🟠 Comparables data is sparse — many rural plots transact once per generation. A "valuation engine" without sufficient local data density is a confidence-eroding hallucination machine. Presenting wrong values with algorithmic authority will destroy trust faster than not having them at all.</div>
+      <div class="acc-reframe">✅ Reframe: Lead with satellite-based physical attribute scoring — plot size, proximity to road/water/market, crop type via NDVI, soil quality estimation. Use ML to estimate relative values across comparable plots, not absolute prices. Always display confidence intervals. Never surface a number without its uncertainty range. Treat community-sourced transaction data collection as a core product flywheel from day one.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-shaky">Shaky</span>
+      <span class="acc-title">Citizens will adopt the platform voluntarily because it helps them</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">Adoption of land formalisation tools fails repeatedly because the people with the most to gain — poor, rural, smallholder landowners — are also the most distrustful of government digitisation, with good historical reason. Previous title registration drives have directly been weaponised for land grabbing.</div>
+      <div class="acc-challenge">🔴 "If I register my land, will the government see I am here and take it?" is a documented fear across rural EA. Transparency platforms terrify exactly the people they aim to protect. The Kenyan 1990s land titling programme is a cautionary tale: women and communal land-holders were systematically dispossessed through the formalisation process itself.</div>
+      <div class="acc-reframe">✅ Reframe: Lead with community champions and NGO partnerships, not government mandates. Build a "private vault" mode where communities hold their own encrypted records with selective disclosure. Allow a plot to be registered community-internally without any public exposure until the owner opts in. Trust must be built bottom-up before it can flow laterally to institutions.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-valid">Valid</span>
+      <span class="acc-title">USSD is the right mobile access channel</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">This assumption is correct and deserves doubling down. The Safaricom M-Pesa model proves USSD can handle high-stakes financial transactions at enormous scale, across Kenya including rural areas with only 2G coverage. Land queries, alert subscriptions, and basic dispute lodging are all achievable via USSD.</div>
+      <div class="acc-reframe">✅ Extend further: Add WhatsApp bot (highest smartphone penetration in urban EA). Add voice IVR in Swahili, Kikuyu, Luo, and Luganda for users who cannot read. The single highest-impact feature to add: an opt-in SMS alert sent to a registered owner whenever their parcel is queried — "Your plot in Kiambu was checked today by Equity Bank." This builds habit, trust, and perceived value immediately.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-partial">Partial</span>
+      <span class="acc-title">Hyperledger Fabric or Ethereum L2 is the right chain choice</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">Both are technically valid but carry major second-order consequences. Hyperledger = permissioned, fast, but government-controlled and centralised. Ethereum L2 = permissionless but dependent on global infrastructure, variable gas costs, and external validators operating in jurisdictions with no EA accountability.</div>
+      <div class="acc-challenge">🟠 Neither is optimised for African infrastructure realities. Both require reliable internet connectivity that does not exist in much of rural EA. And you may be solving for a use case that doesn't need a public chain at all — your users don't need global trustlessness, they need local verifiability.</div>
+      <div class="acc-reframe">✅ Reframe to a hybrid: PostgreSQL + PostGIS as the operational database (offline-capable, battle-tested, fast). Daily batch-hashing of the state root to Celo — a carbon-neutral, mobile-first L2 with extremely low fees and African-community governance. The chain anchors the audit log for external verifiability. It does not store the data. This gives you offline capability, speed, and eventual immutability without requiring constant connectivity.</div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head" onclick="tog(this)">
+      <span class="acc-badge badge-shaky">Shaky</span>
+      <span class="acc-title">Equal access to the platform covers women's land rights</span>
+      <span class="acc-toggle">+</span>
+    </div>
+    <div class="acc-body">
+      <div class="acc-verdict">Platform neutrality is not sufficient when the underlying social structure is patriarchal. A neutral digital tool applied to a gendered power imbalance reproduces the injustice at greater speed and scale, and gives it an algorithmic veneer of legitimacy.</div>
+      <div class="acc-challenge">🔴 If the default first registrant is the husband — because he holds the national ID, pays the fees, speaks to the officer — the platform will systematically exclude women even while claiming to serve them. This happened in every major EA land titling programme of the 20th century. Digital is not different unless you design it to be.</div>
+      <div class="acc-reframe">✅ Reframe: Build affirmative-by-default features. Mandatory co-registration for married couples with both names required on every title. Real-time alerts to all registered co-owners when a transfer or encumbrance is initiated. Automated red-flag for any title transfer within 18 months of a registered death. Community trust schemas for widows. A women's land rights dashboard for NGO partners. Integrate with FIDA Kenya and GROOTS from day one.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANE 3: ARCHITECTURE ══════════════════════════ -->
+<div class="pane" id="arch">
+  <div class="sh">
+    <div class="sh-tag">03 · Hardened Architecture</div>
+    <h2>The revised<br>layer design</h2>
+    <p>Your original stack is structurally sound. These are the additions that make it bullet-proof, and the refinements that address each assumption failure.</p>
+  </div>
+
+  <div class="arch-wrap">
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#2D6A4F;">IDENTITY</div>
+      <div>
+        <h4>Identity &amp; Multi-Party Attestation Layer <span class="arch-new">[MISSING — CRITICAL ADD]</span></h4>
+        <p>National ID biometric anchor (Huduma Namba / NIN / NIMC). Community witness attestation as ID-free fallback for rural citizens. Mandatory satellite boundary verification cross-check before any write is accepted. 3-of-5 multi-party sign-off model. No identity layer = no trustworthy ledger.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#1A6B50;">CHAIN</div>
+      <div>
+        <h4>Blockchain Audit Layer <span class="arch-new">[KEEP — REFINE ROLE]</span></h4>
+        <p>PostgreSQL + PostGIS as operational primary store (offline-capable, fast). Daily state-root batch-hashing to Celo for immutable audit anchoring. Public 30-day challenge window per new registration. Chain = tamper-evident history log, not database. If the chain goes down, the registry still works.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#1A3A6B;">DATA</div>
+      <div>
+        <h4>Unified Land Data Platform <span class="arch-new">[KEEP — EXTEND SCHEMAS]</span></h4>
+        <p>Geospatial DB + parcel registry + titles + encumbrances + valuation history. Critical addition: customary and communal land tenure schemas as first-class types — not edge cases. Clan trust, seasonal grazing, women's secondary rights, community forest use must all be registerable without forcing Western fee-simple title.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#6B2A6B;">DISPUTE</div>
+      <div>
+        <h4>Dispute Resolution Engine <span class="arch-new">[MISSING — CRITICAL ADD]</span></h4>
+        <p>Automated boundary conflict detection (overlapping polygon analysis). Double-title alert system. Timestamped evidence bundle generation. Mediation scheduling workflow. National Land Commission API integration for formal referrals. Generates court-admissible records automatically from existing platform data — no re-entry required.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#7A3A10;">AI</div>
+      <div>
+        <h4>AI Intelligence Modules <span class="arch-new">[KEEP — REWEIGHT PRIORITIES]</span></h4>
+        <p>Original modules (valuation, zoning, population forecasting, utility planning) are valid institutional services. Priority additions: fraud pattern detection (rapid re-transfers, POA abuse, post-death transfers without probate, anomalous valuations); document forgery detection (OCR + anomaly scoring on scanned deeds); satellite-based NDVI crop health and land-use change detection.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#7A5010;">LEGAL</div>
+      <div>
+        <h4>Legal Intelligence Layer <span class="arch-new">[KEEP — EXTEND REACH]</span></h4>
+        <p>Court injunctions + caveats + mortgage encumbrances from court APIs (original design — correct). Add: automated legal aid referral system; plain-language land rights summaries generated in Swahili, Kikuyu, Luo, Luganda; integration with FIDA, GROOTS, and HAKIARDHI case management systems.</p>
+      </div>
+    </div>
+    <div class="arch-arrow">↓</div>
+
+    <div class="arch-layer">
+      <div class="arch-pill" style="background:#4A4A4A;">ACCESS</div>
+      <div>
+        <h4>Access Channels <span class="arch-new">[KEEP — EXPAND SIGNIFICANTLY]</span></h4>
+        <p>Web + USSD + Mobile Apps + Government GIS Dashboard + REST API (original — all correct). Add: WhatsApp bot; voice IVR in 4 languages; community kiosk mode (offline-capable tablet for field officers); SMS parcel alert subscriptions per plot; icon-based low-literacy mobile UI.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="div">
+  <p class="label2">Four critical modules your architecture is missing</p>
+  <div class="grid-2 mt16">
+    <div class="card">
+      <div class="card-accent red"></div>
+      <div class="card-icon">🛡</div>
+      <h3>Fraud Detection Engine</h3>
+      <p>ML model trained on documented EA fraud typologies: rapid re-transfers, unusual valuation jumps, power-of-attorney chains, post-death title mutations without probate, insider official patterns. Real-time risk scoring on every transaction event. Not optional — this is the primary threat model.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent red"></div>
+      <div class="card-icon">⚖️</div>
+      <h3>Dispute Resolution Workflow</h3>
+      <p>Boundary conflict auto-detection, evidence packaging, mediation scheduling, NLC referral. Court-admissible evidence bundles generated automatically. This is the #1 citizen use case. An architecture without this is solving a problem users don't have while ignoring the one they do.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent blue"></div>
+      <div class="card-icon">🌍</div>
+      <h3>Customary Land Engine</h3>
+      <p>First-class schemas for clan trust, communal grazing, seasonal use rights, women's secondary rights, and community forest tenure. Without this, the platform replicates every historical harm of formalisation by forcing non-Western tenure systems into a Western title model.</p>
+    </div>
+    <div class="card">
+      <div class="card-accent blue"></div>
+      <div class="card-icon">📡</div>
+      <h3>Offline-First Sync Architecture</h3>
+      <p>Field officers must be able to record and query without internet. Local SQLite queue with conflict-resolution sync on reconnect. USSD works on 2G. Design the entire platform for 2G as baseline. 4G is the exception in rural EA, not the rule — and the people who most need this live where connectivity is worst.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANE 4: RISKS ═════════════════════════════════ -->
+<div class="pane" id="risks">
+  <div class="sh">
+    <div class="sh-tag">04 · Risk Register</div>
+    <h2>Full spectrum<br>threat map</h2>
+    <p>Technical, political, social, equity, and financial risks — with severity ratings and concrete mitigations. No risk is comfortable to name. All of these are real.</p>
+  </div>
+
+  <div class="risk-wrap">
+    <table class="risk-table">
+      <thead>
+        <tr>
+          <th style="width:28%">Risk</th>
+          <th style="width:12%">Category</th>
+          <th style="width:10%">Severity</th>
+          <th>Mitigation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--sand2)">Corrupt intake enshrines fraudulent titles permanently on-chain</strong></td>
+          <td>Systemic</td>
+          <td><span class="sev sev-c"><span class="sev-dot dc"></span>Critical</span></td>
+          <td>Multi-party attestation before every write; mandatory 30-day public challenge window; satellite boundary cross-verification; treat the chain as dispute-detection, not source of truth</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Government withdraws cooperation mid-pilot</strong></td>
+          <td>Political</td>
+          <td><span class="sev sev-c"><span class="sev-dot dc"></span>Critical</span></td>
+          <td>Design for independent community utility from day one. Community-held records have value without government sign-off. Run both tracks in parallel so no single political event kills the platform.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Platform accelerates elite land grabbing at scale and speed</strong></td>
+          <td>Social</td>
+          <td><span class="sev sev-c"><span class="sev-dot dc"></span>Critical</span></td>
+          <td>Mandatory public disclosure of any parcel with government-affiliated owners. Auto-flag all transfers above 50 acres. Public accountability dashboard with anomaly alerts visible to press and civil society.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Identity system excludes undocumented citizens entirely</strong></td>
+          <td>Equity</td>
+          <td><span class="sev sev-c"><span class="sev-dot dc"></span>Critical</span></td>
+          <td>Community witness attestation as a valid alternative to national ID. Biometric capture as supplementary option. Never gate registration behind document ownership — that replicates the existing exclusion in digital form.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Women systematically excluded by default cultural practices</strong></td>
+          <td>Equity</td>
+          <td><span class="sev sev-c"><span class="sev-dot dc"></span>Critical</span></td>
+          <td>Mandatory co-registration; death-transfer red-flag alerts; women's land rights dashboard; deep NGO integration (FIDA, GROOTS); real-time alerts to all co-owners on any encumbrance attempt</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Connectivity failures in rural areas make the platform unusable</strong></td>
+          <td>Technical</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>Offline-first architecture is non-negotiable. Local SQLite queue with sync on reconnect. USSD works on 2G. Design for 2G baseline across the entire stack. Never require connectivity for core registration actions.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">AI valuation model produces biased, wrong, or misleading values</strong></td>
+          <td>Technical/Trust</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>Explicit confidence intervals always displayed. Human review required for high-stakes financial decisions. Continuous calibration against actual transaction data. Never display a number without its uncertainty range.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Blockchain key loss or network failure corrupts audit records</strong></td>
+          <td>Technical</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>Primary data lives in PostgreSQL — chain going down doesn't take the registry down. Multi-sig key management. Encrypted geographic backups. The chain anchors audits, it does not store operational data.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Donor-funded model collapses when grants end</strong></td>
+          <td>Financial</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>B2B revenue model must be live before Series A. Banks, insurers, and telecoms pay for data access. Citizen registration is free — institutional data is the revenue. Never build on grant dependency as a primary model.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Data breach exposes vulnerable land-owners to targeted fraud</strong></td>
+          <td>Security</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>Kenya Data Protection Act 2019 compliance as the floor. Granular per-field consent. Owner PII encrypted at rest and in transit. Zero-knowledge proofs for selective institutional disclosure. Publish a transparency report annually.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Language and literacy barriers exclude core users</strong></td>
+          <td>Access</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>IVR voice in Swahili, Kikuyu, Luo, Luganda from phase two. Icon-based low-literacy UI. Community intermediary programme — trained local agents who register on behalf of others and are accountable to communities.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Government competitor with political backing outflanks the platform</strong></td>
+          <td>Market</td>
+          <td><span class="sev sev-h"><span class="sev-dot dh"></span>High</span></td>
+          <td>The moat is community trust and unique attestation data — not technology. A government can copy the stack in 12 months. They cannot copy 3 years of community witness records, NGO relationships, and fraud pattern training data.</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--sand2)">Interoperability breaks across Kenya, Uganda, Tanzania, Rwanda</strong></td>
+          <td>Technical</td>
+          <td><span class="sev sev-m"><span class="sev-dot dm"></span>Medium</span></td>
+          <td>Design national modularity from day one — each country is a separate regulatory adapter layer over the shared core. Begin EAC-level land data standards advocacy from year three when political capital exists to push it.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══ PANE 5: PHASES ════════════════════════════════ -->
+<div class="pane" id="phases">
+  <div class="sh">
+    <div class="sh-tag">05 · Execution Blueprint</div>
+    <h2>Four phases,<br>honest timelines</h2>
+    <p>From zero to regional infrastructure. Each phase has a clear success condition before the next begins. No phase depends on government cooperation to deliver value.</p>
+  </div>
+
+  <div class="timeline">
+
+    <div class="phase">
+      <div class="phase-dot"></div>
+      <div class="phase-header">
+        <span class="phase-tag">Phase 01</span>
+        <span class="phase-title">Foundation &amp; Validation</span>
+        <span class="phase-dur">Months 0–6</span>
+      </div>
+      <div class="phase-body">
+        <ul>
+          <li>Select one county with a reformist land officer as internal champion — not a national launch</li>
+          <li>Deep ethnographic research: 50+ 1-on-1 interviews with smallholders, widows, lawyers, community elders, local NGO staff</li>
+          <li>Map the complete existing fraud typology from primary research before building any defences</li>
+          <li>Define customary tenure schemas for the specific ethnic land systems in the chosen pilot area</li>
+          <li>Build offline-capable parcel recording tool: tablet + USSD. No blockchain. No AI. No government integration.</li>
+          <li>Partner with 2–3 local land rights NGOs for community trust and field access</li>
+          <li>Pilot with 500 parcels — community-held, encrypted, no public exposure unless owner opts in</li>
+          <li>Legal review: what can be published vs. kept private under Kenya Data Protection Act 2019</li>
+          <li>Exit criterion: 500 parcels registered, community trust established, fraud typology documented</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-dot"></div>
+      <div class="phase-header">
+        <span class="phase-tag">Phase 02</span>
+        <span class="phase-title">Core Platform Build</span>
+        <span class="phase-dur">Months 6–18</span>
+      </div>
+      <div class="phase-body">
+        <ul>
+          <li>PostgreSQL + PostGIS core database with offline-first sync (local queue architecture)</li>
+          <li>Identity layer: National ID integration + community witness attestation fallback path</li>
+          <li>USSD live on Safaricom + Airtel Kenya — query, register, alert-subscribe</li>
+          <li>Fraud detection: double-title alerts, rapid re-transfer flagging, post-death transfer monitoring</li>
+          <li>Dispute evidence logging and timestamped preservation module</li>
+          <li>SMS parcel alert subscriptions: every query on a registered plot triggers an owner notification</li>
+          <li>Celo batch-hash anchoring of daily state root — not full on-chain data storage</li>
+          <li>Government GIS read-only dashboard for pilot county — no write access, builds relationship</li>
+          <li>Scale to 5,000 parcels across 3 sub-counties</li>
+          <li>Exit criterion: 5,000 parcels, one prevented fraud case documented, first bank query via API</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-dot"></div>
+      <div class="phase-header">
+        <span class="phase-tag">Phase 03</span>
+        <span class="phase-title">AI &amp; Intelligence Layer</span>
+        <span class="phase-dur">Months 18–30</span>
+      </div>
+      <div class="phase-body">
+        <ul>
+          <li>Satellite-based valuation scoring: Sentinel-2 + Planet Labs imagery, relative not absolute, always with confidence bands</li>
+          <li>Document forgery detection: OCR + anomaly scoring on all scanned title deeds at upload</li>
+          <li>Land-use change detection from satellite time series — automatic zoning violation flagging</li>
+          <li>Predictive fraud risk scoring on every new transaction event in real time</li>
+          <li>WhatsApp bot + voice IVR in Swahili live</li>
+          <li>Bank and insurance API live: title status queries with explicit owner consent and audit log</li>
+          <li>First government MoU: read-only cross-verification against official registry — no write dependency</li>
+          <li>Revenue model live: 0.2% conveyancing facilitation fee + bank API subscription tier</li>
+          <li>Exit criterion: B2B revenue covering 40% of opex, AI fraud model trained on 50+ confirmed cases</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="phase">
+      <div class="phase-dot"></div>
+      <div class="phase-header">
+        <span class="phase-tag">Phase 04</span>
+        <span class="phase-title">Institutional &amp; Regional Scale</span>
+        <span class="phase-dur">Months 30–48</span>
+      </div>
+      <div class="phase-body">
+        <ul>
+          <li>Full government integration: read-write API with national land registry, NLC dispute referral pipeline</li>
+          <li>Uganda pilot: adapt schema for Mailo land tenure system — not a copy-paste</li>
+          <li>Rwanda expansion: partner with existing LAIS system as data partner, not a competitor</li>
+          <li>Open developer ecosystem: REST API with freemium tier, third-party fintech integrations</li>
+          <li>Policy track: propose EAC regional land data standards built on platform schema — position from demonstrated utility, not lobbying</li>
+          <li>50,000+ parcels; pilot county government formally adopts as supplementary registry</li>
+          <li>Carbon credit pilot: enable formal credit issuance for verified smallholder agroforestry parcels</li>
+          <li>Series A fundraise: revenue traction + government partnership depth + unique data moat as thesis</li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PANE 6: REBATTLES ══════════════════════════════ -->
+<div class="pane" id="rebattles">
+  <div class="sh">
+    <div class="sh-tag">06 · Rebattles</div>
+    <h2>The strongest<br>objections answered</h2>
+    <p>These are the arguments that will be made in investor meetings, government offices, and academic critiques. Know them cold before you walk into the room.</p>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"Rwanda already solved this. Just adopt LAIS."</strong></div>
+      <div class="reb-cell">Rwanda's Land Administration Information System is genuinely excellent, completed in 2016, internationally praised, and replicated in some form across the continent.</div>
+      <div class="reb-cell">Rwanda required extraordinary post-genocide political centralisation, decade-scale donor funding, and 10 years. It handles customary tenure poorly, is not portable to Kenya or Tanzania's political reality, and has no community-attestation or fraud-detection layer. Learn from its lessons; don't import its constraints.</div>
+    </div>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"Blockchain is a solution looking for a problem."</strong></div>
+      <div class="reb-cell">Most blockchain land registry projects — Honduras, Georgia, Sweden, India — have failed, stalled, or been quietly abandoned. The technology does not fix governance failures.</div>
+      <div class="reb-cell">Agreed, if blockchain is the product. In this design it is only the audit anchor — not the database, not the UX. The value is in community attestation, dispute resolution, and fraud detection. Swap out the chain and the platform still works. The technology is not the thesis.</div>
+    </div>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"You cannot beat entrenched government land interests."</strong></div>
+      <div class="reb-cell">Land is power. Well-connected people profit directly from opacity in land records. Any platform that genuinely fights fraud accumulates powerful institutional enemies quickly.</div>
+      <div class="reb-cell">Don't seek permission to protect community records. Create facts on the ground first. Once 100,000 families have their land documented through your platform, shutting it down becomes politically toxic. Build the coalition, then negotiate with government from demonstrated strength — not from a pitch deck.</div>
+    </div>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"Formalisation destroys the customary rights it claims to protect."</strong></div>
+      <div class="reb-cell">This is the most historically grounded objection. The 1990s Kenya land titling programme dispossessed women and communal groups by converting complex customary rights into simple individual title defaulting to male heads of household.</div>
+      <div class="reb-cell">This objection demands a schema design response, not a PR response. Customary tenure types must be first-class objects: clan trusts, seasonal grazing, women's secondary rights, community forest use — all registerable in their native form. Formalisation is only harmful when it forces Western fee-simple title onto non-Western tenure. This platform's schema refuses to do that.</div>
+    </div>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"The business model will not survive without donor funding."</strong></div>
+      <div class="reb-cell">Smallholder farmers can't pay meaningful fees. Government SaaS deals take years to close. Most civic tech in this space survives on grants and dies when they end.</div>
+      <div class="reb-cell">The real revenue is B2B and institutional: banks pay for collateral verification, insurers pay for crop underwriting data, telecoms pay for KYC verification, investment funds pay for agricultural due diligence. Citizens are the product of the data flywheel. Institutions are the paying customers. Structure the business accordingly from day one.</div>
+    </div>
+  </div>
+
+  <div class="rebattle">
+    <div class="reb-head">
+      <div class="reb-hcell">The Objection</div>
+      <div class="reb-hcell">Why It Has Force</div>
+      <div class="reb-hcell">The Counter</div>
+    </div>
+    <div class="reb-row">
+      <div class="reb-cell"><strong>"You will be replaced by a government-backed competitor with a mandate."</strong></div>
+      <div class="reb-cell">Governments can mandate registration on their own system. If Kenya's official registry gets serious funding and political will, a private platform could be legislated out of relevance.</div>
+      <div class="reb-cell">Governments make poor landlord-registrars and excellent partners. The goal is not to replace the government registry — it is to make government registries better. Position from year one as the infrastructure layer that governments want to integrate with, not compete against. The moat is data and trust, not market exclusivity.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ PANE 7: MOAT & SCALE ══════════════════════════ -->
+<div class="pane" id="moat">
+  <div class="sh">
+    <div class="sh-tag">07 · Moat &amp; Scale</div>
+    <h2>What makes this<br>un-copyable</h2>
+    <p>Technology is the easiest part to replicate. These four assets are what compound over time and cannot be purchased, scraped, or cloned by a well-funded competitor.</p>
+  </div>
+
+  <div class="moat-grid">
+    <div class="moat-card">
+      <div class="moat-tag">Moat 01 · Data</div>
+      <h4>Community Attestation Records</h4>
+      <p>Three years of community witnesses, boundary agreements, and dispute history cannot be replicated by a government system or tech competitor launching tomorrow. Each registered parcel makes every adjacent parcel more valuable to register. This is the real defensible asset — and it is entirely unique to the platform's approach.</p>
+    </div>
+    <div class="moat-card">
+      <div class="moat-tag">Moat 02 · Knowledge</div>
+      <h4>Customary Tenure Schema Library</h4>
+      <p>The work to correctly model Kikuyu, Luo, Maasai, Baganda, Sukuma, and Chagga land tenure systems is years of ethnographic and legal scholarship. No competitor will do this as carefully. Any platform that skips it will fail to serve rural users and will face the same adoption barriers every prior system has faced.</p>
+    </div>
+    <div class="moat-card">
+      <div class="moat-tag">Moat 03 · Relationships</div>
+      <h4>NGO Trust Networks</h4>
+      <p>Relationships with GROOTS Kenya, FIDA, HAKIARDHI Tanzania, and comparable organisations are relationship assets that compound over time and enable access to communities that no technology alone can reach. Technology is copyable in months. These relationships take years. They also provide political cover when powerful interests push back.</p>
+    </div>
+    <div class="moat-card">
+      <div class="moat-tag">Moat 04 · Intelligence</div>
+      <h4>Fraud Pattern Training Data</h4>
+      <p>Every confirmed fraud case logged, every double-title detected, every suspicious transfer pattern flagged becomes proprietary training data for a model that improves continuously and is entirely unique to the platform. This data cannot be purchased, scrubbed from the web, or synthesised. It only exists inside real transaction history.</p>
+    </div>
+  </div>
+
+  <hr class="div">
+  <p class="label2">Revenue architecture — six layered tiers</p>
+
+  <div class="mt16">
+    <div class="rev-row">
+      <div class="rev-tier">Tier 1</div>
+      <div><h4>Government SaaS Subscription</h4><p>County and national government annual subscription for registry access, GIS dashboard, and dispute analytics. Predictable, recurring, but slow to close — not the primary early revenue source.</p></div>
+    </div>
+    <div class="rev-row">
+      <div class="rev-tier">Tier 2</div>
+      <div><h4>Financial Services API</h4><p>Banks, mortgage lenders, MFIs, and SACCOs pay per-query for real-time title verification, collateral status, and encumbrance checks. High volume, recurring, immediate demonstrable value. This is the fastest path to B2B revenue.</p></div>
+    </div>
+    <div class="rev-row">
+      <div class="rev-tier">Tier 3</div>
+      <div><h4>Conveyancing Facilitation Fee</h4><p>0.1–0.3% fee when the platform facilitates a documented transfer or property sale between verified parties. Fee only charged on successful, clean transactions — aligns platform incentives with honest outcomes.</p></div>
+    </div>
+    <div class="rev-row">
+      <div class="rev-tier">Tier 4</div>
+      <div><h4>Insurance &amp; Agricultural Data</h4><p>Crop insurance underwriters and agricultural investment funds pay for parcel-level data packages: NDVI history, ownership stability scores, boundary verification status. High margin, non-sensitive, fully B2B.</p></div>
+    </div>
+    <div class="rev-row">
+      <div class="rev-tier">Tier 5</div>
+      <div><h4>Developer Ecosystem</h4><p>Freemium API for proptech startups, legal-tech firms, and civic tech organisations. Builds ecosystem lock-in and accelerates geographic coverage. Revenue through premium tiers; strategic value through data network effects.</p></div>
+    </div>
+    <div class="rev-row">
+      <div class="rev-tier">Tier 6</div>
+      <div><h4>Carbon &amp; Climate Credits</h4><p>Long-term play: verified land ownership enables formal carbon credit issuance for smallholder agroforestry. New income stream for registered landowners; platform earns a facilitation fee. Requires strong land tenure documentation — which only this platform can provide at rural scale.</p></div>
+    </div>
+  </div>
+
+  <div class="north-star">
+    <blockquote>The platform that wins in East African land is not the best technology. It is the one that earns the trust of the woman who has farmed the same acre for forty years and has never once held a piece of paper that says it belongs to her.</blockquote>
+    <div class="ns-label">North Star — measure every feature decision against this</div>
+  </div>
+
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ── NAV TABS ──────────────────────────────────────────
+const btns=document.querySelectorAll('.nav-btn');
+const panes=document.querySelectorAll('.pane');
+btns.forEach(b=>{
+  b.addEventListener('click',()=>{
+    btns.forEach(x=>x.classList.remove('on'));
+    panes.forEach(x=>x.classList.remove('on'));
+    b.classList.add('on');
+    const p=document.getElementById(b.dataset.pane);
+    p.classList.add('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+// ── ACCORDIONS ────────────────────────────────────────
+function tog(head){
+  head.closest('.acc').classList.toggle('open');
+}
+
+// ── OPEN ALL ACCS ON PANE CLICK ───────────────────────
+// First acc already open via HTML class — others expand on click
+</script>
+</body>
+</html>
+HTMLEOF
